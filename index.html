@@ -1,45 +1,44 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrossPay Payment Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>صفحة الدفع</title>
 </head>
 <body>
-    <h1>CrossPay Payment Gateway Test</h1>
+    <h1>إجراء عملية دفع</h1>
     <form id="paymentForm">
-        <label for="firstname">First Name:</label>
+        <label for="invoiceid">رقم الفاتورة:</label>
+        <input type="text" id="invoiceid" name="invoiceid" required><br><br>
+
+        <label for="amount">المبلغ:</label>
+        <input type="number" id="amount" name="amount" required><br><br>
+
+        <label for="currency">العملة:</label>
+        <input type="text" id="currency" name="currency" value="USD" required><br><br>
+
+        <h3>بيانات العميل</h3>
+        <label for="firstname">الاسم الأول:</label>
         <input type="text" id="firstname" name="firstname" required><br><br>
 
-        <label for="lastname">Last Name:</label>
+        <label for="lastname">اسم العائلة:</label>
         <input type="text" id="lastname" name="lastname" required><br><br>
 
-        <label for="email">Email:</label>
+        <label for="email">البريد الإلكتروني:</label>
         <input type="email" id="email" name="email" required><br><br>
 
-        <label for="phonenumber">Phone Number:</label>
+        <label for="phonenumber">رقم الهاتف:</label>
         <input type="text" id="phonenumber" name="phonenumber" required><br><br>
 
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" name="amount" step="0.01" required><br><br>
-
-        <label for="currency">Currency:</label>
-        <select id="currency" name="currency" required>
-            <option value="USD">USD</option>
-            <option value="ILS">ILS (Shekel)</option>
-        </select><br><br>
-
-        <button type="button" onclick="initiatePayment()">Pay Now</button>
+        <button type="submit">ادفع الآن</button>
     </form>
 
     <script>
-        async function initiatePayment() {
-            const formData = new FormData(document.getElementById('paymentForm'));
-            const params = {
-                apiKey: 'YOUR_CROSSPAY_API_KEY',
-                invoiceid: 'INV-' + Date.now(), // Generate a unique invoice ID
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = {
+                invoiceid: formData.get('invoiceid'),
                 amount: formData.get('amount'),
                 currency: formData.get('currency'),
                 clientdetails: {
@@ -47,29 +46,25 @@
                     lastname: formData.get('lastname'),
                     email: formData.get('email'),
                     phonenumber: formData.get('phonenumber'),
-                },
-                description: 'Test Payment',
+                }
             };
 
             try {
-                // Make API request to the local Node.js server as a proxy
-                const response = await axios.post('http://localhost:3000/initiatePayment', params, {
+                const response = await fetch('/initiatePayment', {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     },
+                    body: JSON.stringify(data),
                 });
 
-                if (response.status === 200) {
-                    const result = response.data;
-                    alert('Payment initiated successfully: ' + JSON.stringify(result));
-                } else {
-                    throw new Error('Unexpected response status: ' + response.status);
-                }
+                const result = await response.json();
+                console.log(result);
+                alert(`حالة الدفع: ${result.status}`);
             } catch (error) {
-                alert('Error initiating payment: ' + error.message);
+                console.error('Error:', error);
             }
-        }
+        });
     </script>
 </body>
 </html>
