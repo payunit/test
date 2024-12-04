@@ -11,10 +11,11 @@ const PORT = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Define CrossPay API Endpoints and Keys
-const CROSSPAY_API_DATA = '82e4b4fd3a16ad99229af9911ce8e6d2';
+// Load CrossPay API credentials from .env file
+const CROSSPAY_API_DATA = process.env.CROSSPAY_API_DATA;
+const CROSSPAY_API_KEY = process.env.CROSSPAY_API_KEY;
+const CROSSPAY_SECRET_KEY = process.env.CROSSPAY_SECRET_KEY;
 const CROSSPAY_API_ENDPOINT = 'https://crosspayonline.com/api/createInvoiceByAccountLahza';
-const CROSSPAY_SECRET_KEY = 'c93854-d73bdb-13b176-088d64-606965'; // Secret key for verification
 
 // Endpoint to initiate payment request to CrossPay
 app.post('/initiatePayment', async (req, res) => {
@@ -22,7 +23,7 @@ app.post('/initiatePayment', async (req, res) => {
     const params = req.body;
 
     // Validate required parameters
-    const requiredParams = ['apiKey', 'invoiceid', 'amount', 'currency', 'clientdetails'];
+    const requiredParams = ['invoiceid', 'amount', 'currency', 'clientdetails'];
     requiredParams.forEach((param) => {
       if (!params[param]) {
         throw new Error(`Missing required parameter: ${param}`);
@@ -55,7 +56,7 @@ app.post('/initiatePayment', async (req, res) => {
 
         // Check the payment status
         if (result.paid === 1) {
-          // Payment successful, update user balance
+          // Payment successful
           res.json({
             status: 'success',
             crosspay_invoice_id: result.invoice_id_crosspay,
@@ -85,18 +86,18 @@ app.post('/initiatePayment', async (req, res) => {
 
 // Function to prepare post fields for the API request
 function preparePostFields(params) {
-  const { clientdetails, invoiceid, amount, currency, apiKey } = params;
+  const { clientdetails, invoiceid, amount, currency } = params;
 
   return {
     api_data: CROSSPAY_API_DATA,
     invoice_id: invoiceid,
-    apiKey: apiKey,
+    apiKey: CROSSPAY_API_KEY,
     total: amount,
     currency: currency,
     email: clientdetails.email,
     mobile: validateAndCleanPhoneNumber(clientdetails.phonenumber),
     name: `${clientdetails.firstname} ${clientdetails.lastname}`,
-    description: `Transaction ID: ${invoiceid}`
+    description: `Transaction ID: ${invoiceid}`,
   };
 }
 
