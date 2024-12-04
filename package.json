@@ -1,14 +1,14 @@
 {
   "name": "crosspay-integration",
   "version": "1.0.0",
+  "description": "CrossPay Payment Gateway Integration using Node.js",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "axios": "^0.21.1",
-    "dotenv": "^8.2.0",
-    "crypto": "^1.0.1"
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.1"
   }
 }
